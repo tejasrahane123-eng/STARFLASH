@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Distraction Detector</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 22px 35px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #cbd5e1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .card h3 {
+            font-size: 15px;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+
+        .number {
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .focused {
+            color: #16a34a;
+        }
+
+        .distracted {
+            color: #dc2626;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .section h2 {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: #f8fafc;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+
+        @media (max-width: 1000px) {
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            table {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 700px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>🎓 Student Distraction Detector</h1>
+        <p>AI-powered classroom attention monitoring dashboard</p>
+    </div>
+
+    <div class="container">
+
+        <div class="cards">
+
+            <div class="card">
+                <h3>Students Detected</h3>
+                <div class="number" id="students">0</div>
+            </div>
+
+            <div class="card">
+                <h3>Currently Focused</h3>
+                <div class="number focused" id="focused">0</div>
+            </div>
+
+            <div class="card">
+                <h3>Currently Distracted</h3>
+                <div class="number distracted" id="distracted">0</div>
+            </div>
+
+            <div class="card">
+                <h3>Focus Percentage</h3>
+                <div class="number" id="focusPercent">0%</div>
+            </div>
+
+        </div>
+
+        <div class="section">
+
+            <h2>Student Status</h2>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Status</th>
+                        <th>Direction</th>
+                        <th>Attention</th>
+                        <th>Total Distractions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="studentTable">
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <script>
+        async function updateDashboard() {
+            try {
+                const response = await fetch("/api/data");
+                const data = await response.json();
+
+                document.getElementById("students").textContent =
+                    data.students ?? 0;
+
+                document.getElementById("focused").textContent =
+                    data.focused ?? 0;
+
+                document.getElementById("distracted").textContent =
+                    data.distracted ?? 0;
+
+                document.getElementById("focusPercent").textContent =
+                    (data.focus_percent ?? 0) + "%";
+
+                const table = document.getElementById("studentTable");
+                table.innerHTML = "";
+
+                for (const [studentId, student] of Object.entries(
+                    data.student_status || {}
+                )) {
+                    const row = document.createElement("tr");
+
+                    row.innerHTML = `
+                        <td>Student ${studentId}</td>
+                        <td class="status">${student.status ?? "UNKNOWN"}</td>
+                        <td>${student.direction ?? "CENTER"}</td>
+                        <td>${student.attention ?? 0}%</td>
+                        <td>${student.total_distractions ?? 0}</td>
+                    `;
+
+                    table.appendChild(row);
+                }
+
+            } catch (error) {
+                console.log("Dashboard update error:", error);
+            }
+        }
+
+        updateDashboard();
+        setInterval(updateDashboard, 1000);
+    </script>
+
+</body>
+</html>

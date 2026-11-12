@@ -1,0 +1,2752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STARFLASH</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#111827">
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+
+    :root{
+      --bg:#f5f7fb;
+      --panel:#fff;
+      --text:#172033;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --nav:#111827;
+      --accent:#4f46e5;
+      --good:#16a34a;
+      --bad:#dc2626;
+      --warn:#f59e0b;
+    }
+
+    body{
+      font-family:Inter,Segoe UI,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text)
+    }
+
+    .splash{
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 50% 42%,rgba(59,130,246,.18),transparent 30%),
+        radial-gradient(circle at 20% 20%,rgba(124,58,237,.18),transparent 26%),
+        radial-gradient(circle at 80% 78%,rgba(14,165,233,.16),transparent 28%),
+        #050816;
+      color:#fff;
+      transition:opacity .65s ease,visibility .65s ease,transform .65s ease
+    }
+
+    .splash.hide{
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+      transform:scale(1.04)
+    }
+
+    .splash::before{
+      content:"";
+      position:absolute;
+      inset:-20%;
+      background:conic-gradient(from 0deg,transparent 0deg,rgba(96,165,250,.08) 75deg,transparent 150deg,rgba(167,139,250,.07) 230deg,transparent 310deg);
+      animation:splashSpin 12s linear infinite
+    }
+
+    .splash-grid{
+      position:absolute;
+      inset:0;
+      opacity:.18;
+      background-image:linear-gradient(rgba(148,163,184,.11) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.11) 1px,transparent 1px);
+      background-size:44px 44px;
+      mask-image:linear-gradient(to bottom,transparent 0%,black 22%,black 78%,transparent 100%);
+      animation:gridDrift 8s linear infinite
+    }
+
+    .splash-particles{
+      position:absolute;
+      inset:0;
+      pointer-events:none
+    }
+
+    .splash-particles span{
+      position:absolute;
+      width:4px;
+      height:4px;
+      border-radius:50%;
+      background:#93c5fd;
+      box-shadow:0 0 12px rgba(147,197,253,.85);
+      opacity:.35;
+      animation:particleFloat 4s ease-in-out infinite
+    }
+
+    .splash-particles span:nth-child(1){left:14%;top:27%;animation-delay:-1.1s}
+    .splash-particles span:nth-child(2){left:82%;top:19%;width:3px;height:3px;animation-delay:-2.1s}
+    .splash-particles span:nth-child(3){left:73%;top:73%;width:5px;height:5px;animation-delay:-.5s}
+    .splash-particles span:nth-child(4){left:23%;top:78%;width:3px;height:3px;animation-delay:-2.8s}
+    .splash-particles span:nth-child(5){left:33%;top:14%;width:3px;height:3px;animation-delay:-1.7s}
+    .splash-particles span:nth-child(6){left:88%;top:52%;width:4px;height:4px;animation-delay:-3.3s}
+
+    .splash-orbit{
+      position:absolute;
+      width:330px;
+      height:330px;
+      border:1px solid rgba(96,165,250,.15);
+      border-radius:50%;
+      animation:orbitPulse 3.6s ease-in-out infinite
+    }
+
+    .splash-orbit::before,
+    .splash-orbit::after{
+      content:"";
+      position:absolute;
+      inset:20px;
+      border:1px solid rgba(167,139,250,.12);
+      border-radius:50%;
+    }
+
+    .splash-orbit::after{
+      inset:56px;
+      border-color:rgba(56,189,248,.12);
+    }
+
+    .splash-content{
+      position:relative;
+      z-index:2;
+      width:min(88vw,460px);
+      text-align:center;
+      animation:splashIn .95s cubic-bezier(.2,.8,.2,1) both
+    }
+
+    .splash-logo-ring{
+      position:relative;
+      width:138px;
+      height:138px;
+      margin:0 auto;
+      display:grid;
+      place-items:center;
+      border-radius:38px;
+      background:linear-gradient(135deg,rgba(96,165,250,.18),rgba(167,139,250,.18));
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 0 0 1px rgba(96,165,250,.06),0 0 50px rgba(59,130,246,.22),0 24px 70px rgba(0,0,0,.42);
+      animation:logoFloat 2.5s ease-in-out infinite
+    }
+
+    .splash-logo-ring::before{
+      content:"";
+      position:absolute;
+      inset:-11px;
+      border-radius:46px;
+      border:1px solid rgba(96,165,250,.26);
+      box-shadow:0 0 28px rgba(96,165,250,.16);
+      animation:logoRing 2.6s ease-in-out infinite
+    }
+
+    .splash-logo{
+      width:108px;
+      height:108px;
+      border-radius:28px;
+      object-fit:cover;
+      box-shadow:0 14px 40px rgba(0,0,0,.40);
+    }
+
+    .splash-kicker{
+      margin-top:22px;
+      font-size:10px;
+      letter-spacing:4px;
+      text-transform:uppercase;
+      color:#93c5fd;
+      font-weight:700
+    }
+
+    .splash-title{
+      margin-top:7px;
+      font-size:39px;
+      line-height:1;
+      font-weight:900;
+      letter-spacing:5px;
+      text-shadow:0 0 24px rgba(96,165,250,.26);
+    }
+
+    .splash-subtitle{
+      margin-top:12px;
+      font-size:13px;
+      color:#cbd5e1;
+      letter-spacing:1.2px
+    }
+
+    .splash-status{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      margin-top:18px;
+      min-height:18px;
+      color:#94a3b8;
+      font-size:11px;
+      letter-spacing:.4px
+    }
+
+    .splash-status-dot{
+      width:7px;
+      height:7px;
+      border-radius:50%;
+      background:#60a5fa;
+      box-shadow:0 0 12px rgba(96,165,250,.9);
+      animation:statusBlink 1.15s ease-in-out infinite
+    }
+
+    .splash-progress-wrap{
+      width:min(260px,72vw);
+      margin:17px auto 0;
+    }
+
+    .splash-loader{
+      width:100%;
+      height:5px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:999px;
+      overflow:hidden;
+      box-shadow:inset 0 0 10px rgba(0,0,0,.25)
+    }
+
+    .splash-loader span{
+      display:block;
+      width:7%;
+      height:100%;
+      background:linear-gradient(90deg,#60a5fa,#a78bfa,#22d3ee);
+      border-radius:999px;
+      box-shadow:0 0 16px rgba(96,165,250,.65);
+      transition:width .22s ease
+    }
+
+    .splash-progress-text{
+      margin-top:8px;
+      font-size:10px;
+      color:#64748b;
+      letter-spacing:1.6px
+    }
+
+    @keyframes splashIn{
+      from{opacity:0;transform:translateY(22px) scale(.94)}
+      to{opacity:1;transform:translateY(0) scale(1)}
+    }
+
+    @keyframes logoFloat{
+      0%,100%{transform:translateY(0) rotate(0deg)}
+      50%{transform:translateY(-7px) rotate(.6deg)}
+    }
+
+    @keyframes logoRing{
+      0%,100%{transform:scale(.96);opacity:.5}
+      50%{transform:scale(1.03);opacity:1}
+    }
+
+    @keyframes splashSpin{
+      to{transform:rotate(360deg)}
+    }
+
+    @keyframes gridDrift{
+      to{background-position:44px 44px}
+    }
+
+    @keyframes particleFloat{
+      0%,100%{transform:translate3d(0,0,0);opacity:.2}
+      50%{transform:translate3d(0,-12px,0);opacity:.85}
+    }
+
+    @keyframes orbitPulse{
+      0%,100%{transform:scale(.96);opacity:.55}
+      50%{transform:scale(1.03);opacity:1}
+    }
+
+    @keyframes statusBlink{
+      0%,100%{transform:scale(.85);opacity:.55}
+      50%{transform:scale(1.18);opacity:1}
+    }
+
+    @media(max-width:520px){
+      .splash-orbit{width:270px;height:270px}
+      .splash-logo-ring{width:124px;height:124px}
+      .splash-logo{width:96px;height:96px}
+      .splash-title{font-size:31px;letter-spacing:4px}
+    }
+
+    .splash-scan{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      opacity:.28;
+      background:linear-gradient(to bottom,transparent 0%,rgba(96,165,250,.08) 48%,rgba(255,255,255,.22) 50%,rgba(96,165,250,.08) 52%,transparent 100%);
+      transform:translateY(-120%);
+      animation:scanSweep 3.2s cubic-bezier(.22,.61,.36,1) infinite;
+    }
+
+    .splash-core{
+      position:absolute;
+      width:220px;
+      height:220px;
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(96,165,250,.10) 0%,rgba(59,130,246,.05) 36%,transparent 68%);
+      filter:blur(.2px);
+      animation:corePulse 2.2s ease-in-out infinite;
+      pointer-events:none;
+    }
+
+    .splash-core span,
+    .splash-core::before,
+    .splash-core::after{
+      content:"";
+      position:absolute;
+      inset:28px;
+      border-radius:50%;
+      border:1px solid rgba(96,165,250,.18);
+    }
+
+    .splash-core span{
+      inset:58px;
+      border-color:rgba(34,211,238,.24);
+      box-shadow:0 0 26px rgba(34,211,238,.18);
+      animation:coreSpin 5s linear infinite;
+    }
+
+    .splash-core::after{
+      inset:78px;
+      border-color:rgba(167,139,250,.22);
+      animation:coreSpin 7s linear infinite reverse;
+    }
+
+    .splash-title{
+      animation:titleGlow 2.6s ease-in-out infinite;
+    }
+
+    .splash-progress-wrap{
+      position:relative;
+    }
+
+    .splash-progress-wrap::after{
+      content:"";
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:-10px;
+      height:1px;
+      background:linear-gradient(90deg,transparent,rgba(96,165,250,.35),transparent);
+      animation:linePulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes scanSweep{
+      0%{transform:translateY(-120%);opacity:0}
+      12%{opacity:.42}
+      50%{opacity:.65}
+      88%{opacity:.42}
+      100%{transform:translateY(120%);opacity:0}
+    }
+
+    @keyframes corePulse{
+      0%,100%{transform:scale(.86);opacity:.36}
+      50%{transform:scale(1.08);opacity:.8}
+    }
+
+    @keyframes coreSpin{
+      to{transform:rotate(360deg)}
+    }
+
+    @keyframes titleGlow{
+      0%,100%{text-shadow:0 0 18px rgba(96,165,250,.20),0 0 40px rgba(167,139,250,.05)}
+      50%{text-shadow:0 0 28px rgba(96,165,250,.42),0 0 62px rgba(167,139,250,.18)}
+    }
+
+    @keyframes linePulse{
+      0%,100%{opacity:.25;transform:scaleX(.7)}
+      50%{opacity:.8;transform:scaleX(1)}
+    }
+
+    .camera-panel{
+      margin-bottom:20px
+    }
+
+    .camera-layout{
+      display:grid;
+      grid-template-columns:1.5fr .8fr;
+      gap:18px
+    }
+
+    .camera-wrap{
+      position:relative;
+      border-radius:14px;
+      overflow:hidden;
+      background:#020617;
+      min-height:360px;
+      display:grid;
+      place-items:center
+    }
+
+    .camera-wrap img{
+      width:100%;
+      height:100%;
+      min-height:360px;
+      object-fit:cover;
+      display:block
+    }
+
+    .camera-overlay{
+      position:absolute;
+      left:14px;
+      top:14px;
+      right:14px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      pointer-events:none
+    }
+
+    .camera-chip{
+      padding:8px 10px;
+      background:rgba(17,24,39,.80);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:999px;
+      color:#fff;
+      font-size:12px
+    }
+
+    .camera-placeholder{
+      position:absolute;
+      text-align:center;
+      color:#cbd5e1;
+      pointer-events:none
+    }
+
+    .camera-placeholder strong{
+      display:block;
+      font-size:17px;
+      margin-bottom:6px
+    }
+
+    .session-controls{
+      display:grid;
+      gap:11px;
+      align-content:start
+    }
+
+    .control-btn{
+      width:100%;
+      border:none;
+      border-radius:11px;
+      padding:12px 14px;
+      font-size:13px;
+      font-weight:800;
+      cursor:pointer;
+      transition:transform .18s ease,opacity .18s ease
+    }
+
+    .control-btn:hover{
+      transform:translateY(-1px);
+      opacity:.94
+    }
+
+    .btn-start{background:#16a34a;color:#fff}
+    .btn-pause{background:#f59e0b;color:#111827}
+    .btn-reset{background:#eef2ff;color:#3730a3}
+
+    .camera-status{
+      padding:14px;
+      border-radius:12px;
+      background:#fafafa;
+      border:1px solid var(--line)
+    }
+
+    .camera-status-title{
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:5px
+    }
+
+    .camera-status-value{
+      font-size:15px;
+      font-weight:800
+    }
+
+    .live-student-panel{
+      padding:14px;
+      border-radius:12px;
+      background:#fafafa;
+      border:1px solid var(--line);
+      max-height:260px;
+      overflow-y:auto
+    }
+
+    .live-student-panel-title{
+      font-size:12px;
+      font-weight:800;
+      color:var(--muted);
+      margin-bottom:10px
+    }
+
+    .student-mini-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:11px;
+      padding:11px;
+      margin-bottom:9px;
+      animation:studentCardIn .25s ease
+    }
+
+    .student-mini-card:last-child{margin-bottom:0}
+
+    .student-mini-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      margin-bottom:8px
+    }
+
+    .student-mini-name{
+      font-size:13px;
+      font-weight:800
+    }
+
+    .student-mini-status{
+      font-size:10px;
+      font-weight:800;
+      padding:5px 8px;
+      border-radius:999px
+    }
+
+    .student-mini-status.focused{
+      background:#ecfdf3;
+      color:#166534
+    }
+
+    .student-mini-status.distracted{
+      background:#fef2f2;
+      color:#991b1b
+    }
+
+    .student-mini-row{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      font-size:11px;
+      color:var(--muted);
+      margin-top:5px
+    }
+
+    .student-mini-row strong{
+      color:var(--text);
+      font-weight:700
+    }
+
+    .no-live-students{
+      text-align:center;
+      color:#9ca3af;
+      font-size:11px;
+      padding:12px 4px
+    }
+
+    @keyframes studentCardIn{
+      from{opacity:0;transform:translateY(5px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+
+
+    /* SEARCH / SETTINGS / HELP */
+    .utility-grid{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:18px;
+    }
+
+    .search-bar{
+      display:grid;
+      grid-template-columns:1fr auto auto;
+      gap:10px;
+      margin-bottom:14px;
+    }
+
+    .text-input,
+    .select-input{
+      width:100%;
+      border:1px solid var(--line);
+      background:var(--panel);
+      color:var(--text);
+      border-radius:11px;
+      padding:11px 12px;
+      outline:none;
+      font:inherit;
+      font-size:13px;
+    }
+
+    .text-input:focus,
+    .select-input:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px rgba(79,70,229,.10);
+    }
+
+    .utility-btn{
+      border:0;
+      border-radius:11px;
+      padding:11px 14px;
+      font-size:13px;
+      font-weight:800;
+      cursor:pointer;
+      background:#eef2ff;
+      color:#3730a3;
+      transition:transform .18s ease,opacity .18s ease;
+    }
+
+    .utility-btn:hover{
+      transform:translateY(-1px);
+      opacity:.94;
+    }
+
+    .utility-btn.primary{
+      background:var(--accent);
+      color:#fff;
+    }
+
+    .search-results{
+      display:grid;
+      gap:10px;
+    }
+
+    .search-empty{
+      padding:24px;
+      border:1px dashed var(--line);
+      border-radius:12px;
+      text-align:center;
+      color:var(--muted);
+      background:var(--panel);
+      font-size:13px;
+    }
+
+    .search-result-card{
+      display:grid;
+      grid-template-columns:1.1fr 1fr 1fr 1fr;
+      gap:10px;
+      align-items:center;
+      padding:13px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:var(--panel);
+    }
+
+    .result-label{
+      display:block;
+      font-size:11px;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+
+    .result-value{
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .settings-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .setting-row{
+      display:grid;
+      grid-template-columns:1fr 180px;
+      gap:14px;
+      align-items:center;
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:var(--panel);
+    }
+
+    .setting-title{
+      font-size:13px;
+      font-weight:800;
+      margin-bottom:3px;
+    }
+
+    .setting-note{
+      font-size:11px;
+      line-height:1.45;
+      color:var(--muted);
+    }
+
+    .setting-actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+      margin-top:14px;
+      flex-wrap:wrap;
+    }
+
+    .help-grid{
+      display:grid;
+      gap:10px;
+    }
+
+    .help-item{
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:var(--panel);
+      overflow:hidden;
+    }
+
+    .help-item summary{
+      cursor:pointer;
+      list-style:none;
+      padding:13px 14px;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .help-item summary::-webkit-details-marker{
+      display:none;
+    }
+
+    .help-item summary::after{
+      content:'+';
+      float:right;
+      color:var(--muted);
+      font-size:18px;
+      line-height:12px;
+    }
+
+    .help-item[open] summary::after{
+      content:'−';
+    }
+
+    .help-content{
+      padding:0 14px 14px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.6;
+    }
+
+    .shortcut-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .shortcut{
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:var(--panel);
+      text-align:center;
+    }
+
+    .key{
+      display:inline-flex;
+      min-width:28px;
+      justify-content:center;
+      padding:5px 8px;
+      border:1px solid var(--line);
+      border-bottom-width:2px;
+      border-radius:7px;
+      background:var(--bg);
+      font-weight:800;
+      font-size:11px;
+    }
+
+    body.dark{
+      --bg:#0b1220;
+      --panel:#111827;
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --line:#263244;
+      --nav:#020617;
+    }
+
+    body.dark th{
+      background:#0f172a;
+    }
+
+    body.dark .camera-status,
+    body.dark .student-mini-card,
+    body.dark .info-box,
+    body.dark .card,
+    body.dark .panel,
+    body.dark .search-result-card,
+    body.dark .search-empty,
+    body.dark .help-item,
+    body.dark .shortcut,
+    body.dark .setting-row{
+      box-shadow:none;
+    }
+
+    body.compact .panel{
+      padding:14px;
+    }
+
+    body.compact .card{
+      padding:14px;
+    }
+
+    body.compact .panel-head{
+      margin-bottom:10px;
+    }
+
+    @media(max-width:1100px){
+      .camera-layout{grid-template-columns:1fr}
+    }
+
+    .app{
+      min-height:100vh;
+      display:flex
+    }
+
+    .sidebar{
+      width:230px;
+      background:var(--nav);
+      color:#fff;
+      padding:24px 16px;
+      position:fixed;
+      inset:0 auto 0 0
+    }
+
+    .brand{
+      font-size:21px;
+      font-weight:800;
+      line-height:1.2;
+      margin:4px 8px 28px
+    }
+
+    .brand span{
+      display:block;
+      font-size:12px;
+      color:#9ca3af;
+      font-weight:500;
+      margin-top:6px
+    }
+
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:8px
+    }
+
+    .nav a{
+      color:#d1d5db;
+      text-decoration:none;
+      padding:11px 12px;
+      border-radius:10px;
+      font-size:14px
+    }
+
+    .nav a.active,
+    .nav a:hover{
+      background:#1f2937;
+      color:#fff
+    }
+
+    .main{
+      margin-left:230px;
+      width:calc(100% - 230px);
+      padding:26px 30px
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:18px;
+      margin-bottom:22px
+    }
+
+    .title h1{
+      font-size:28px;
+      margin-bottom:6px
+    }
+
+    .title p{
+      font-size:14px;
+      color:var(--muted)
+    }
+
+    .live{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      background:#fff;
+      border:1px solid var(--line);
+      padding:9px 13px;
+      border-radius:999px;
+      font-size:13px
+    }
+
+    .dot{
+      width:9px;
+      height:9px;
+      border-radius:50%;
+      background:var(--good);
+      display:inline-block
+    }
+
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:16px;
+      margin-bottom:20px
+    }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:19px;
+      box-shadow:0 8px 24px rgba(17,24,39,.05)
+    }
+
+    .label{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:9px
+    }
+
+    .value{
+      font-size:30px;
+      font-weight:800
+    }
+
+    .sub{
+      margin-top:6px;
+      font-size:12px;
+      color:var(--muted)
+    }
+
+    .good{color:var(--good)}
+    .bad{color:var(--bad)}
+
+    .grid2{
+      display:grid;
+      grid-template-columns:1.5fr 1fr;
+      gap:20px
+    }
+
+    .panel{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:20px;
+      box-shadow:0 8px 24px rgba(17,24,39,.05)
+    }
+
+    .panel-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:16px
+    }
+
+    .panel-head h2{
+      font-size:18px
+    }
+
+    .tag{
+      font-size:12px;
+      color:var(--muted);
+      background:#f3f4f6;
+      padding:6px 9px;
+      border-radius:999px
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse
+    }
+
+    th,td{
+      padding:13px 10px;
+      border-bottom:1px solid var(--line);
+      font-size:13px;
+      text-align:left
+    }
+
+    th{
+      font-size:12px;
+      color:var(--muted);
+      background:#fafafa
+    }
+
+    tbody tr:hover{
+      background:#fafafa
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 9px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:700
+    }
+
+    .badge.focus{
+      background:#ecfdf3;
+      color:#166534
+    }
+
+    .badge.dist{
+      background:#fef2f2;
+      color:#991b1b
+    }
+
+    .meter{
+      height:8px;
+      background:#edf0f4;
+      border-radius:999px;
+      overflow:hidden
+    }
+
+    .fill{
+      height:100%;
+      background:var(--accent);
+      border-radius:999px;
+      transition:width .4s ease
+    }
+
+    .attention{
+      display:grid;
+      gap:11px
+    }
+
+    .rowline{
+      display:flex;
+      justify-content:space-between;
+      font-size:13px;
+      margin-bottom:6px
+    }
+
+    .small{
+      font-size:12px;
+      color:var(--muted)
+    }
+
+    .info{
+      display:grid;
+      gap:12px
+    }
+
+    .info-box{
+      padding:13px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#fafafa
+    }
+
+    .info-title{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:4px
+    }
+
+    .info-value{
+      font-size:15px;
+      font-weight:700
+    }
+
+    /* CHART */
+    .chart-panel{
+      margin-top:20px
+    }
+
+    .chart-wrap{
+      position:relative;
+      height:320px;
+      width:100%
+    }
+
+    .chart-stats{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-top:16px
+    }
+
+    .chart-stat{
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#fafafa
+    }
+
+    .chart-stat-title{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:5px
+    }
+
+    .chart-stat-value{
+      font-size:20px;
+      font-weight:800
+    }
+
+    .footer{
+      text-align:center;
+      color:#9ca3af;
+      font-size:12px;
+      margin-top:18px
+    }
+
+    @media(max-width:1100px){
+      .cards{
+        grid-template-columns:repeat(2,1fr)
+      }
+
+      .grid2{
+        grid-template-columns:1fr
+      }
+
+      .sidebar{
+        width:200px
+      }
+
+      .main{
+        margin-left:200px;
+        width:calc(100% - 200px)
+      }
+    }
+
+    @media(max-width:720px){
+      .app{
+        display:block
+      }
+
+      .sidebar{
+        position:static;
+        width:100%;
+        padding:16px
+      }
+
+      .nav{
+        flex-direction:row;
+        flex-wrap:wrap
+      }
+
+      .main{
+        margin-left:0;
+        width:100%;
+        padding:18px
+      }
+
+      .cards{
+        grid-template-columns:1fr
+      }
+
+      .topbar{
+        flex-direction:column
+      }
+
+      .chart-stats{
+        grid-template-columns:1fr
+      }
+
+      table{
+        min-width:700px
+      }
+
+      .panel{
+        overflow-x:auto
+      }
+    }
+
+    /* APP PAGE MODE */
+    .app-page{
+      display:none !important;
+      animation:pageIn .22s ease both;
+    }
+
+    .app-page.page-active{
+      display:block !important;
+    }
+
+    #studentSection.app-page.page-active{
+      display:grid !important;
+      grid-template-columns:1fr !important;
+      gap:20px;
+    }
+
+    .page-spacer{
+      display:none !important;
+    }
+
+    @keyframes pageIn{
+      from{opacity:0;transform:translateY(5px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    .nav a.active{
+      box-shadow:inset 3px 0 0 rgba(255,255,255,.65);
+    }
+
+  </style>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+  <div class="splash" id="splash">
+    <div class="splash-grid"></div>
+
+    <div class="splash-particles" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="splash-orbit" aria-hidden="true"></div>
+    <div class="splash-scan" aria-hidden="true"></div>
+    <div class="splash-core" aria-hidden="true"><span></span></div>
+
+    <div class="splash-content">
+      <div class="splash-logo-ring">
+        <img class="splash-logo" src="/static/icon-192.png" alt="STARFLASH logo">
+      </div>
+      <div class="splash-kicker">SMART ATTENTION MONITORING</div>
+      <div class="splash-title">STARFLASH</div>
+      <div class="splash-subtitle">AI-powered student attention &amp; distraction detection</div>
+      <div class="splash-status">
+        <span class="splash-status-dot"></span>
+        <span id="splashStatusText">Initializing AI system...</span>
+      </div>
+      <div class="splash-progress-wrap">
+        <div class="splash-loader"><span id="splashProgressBar"></span></div>
+        <div class="splash-progress-text" id="splashProgressText">0%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app">
+
+    <aside class="sidebar">
+
+      <div class="brand">
+        STARFLASH
+        <span>AI Attention Monitoring</span>
+      </div>
+
+      <nav class="nav" id="appNav">
+       <a href="#" data-page="live-monitoring">Live Monitoring</a>
+        <a href="#" data-page="dashboard">Dashboard</a>
+        <a href="#live-students" data-page="live-students">Live Students</a>
+        <a href="#session-report" data-page="session-report">Session Report</a>
+        <a href="#storage-room" data-page="storage-room">🗄 Storage Room</a>
+        <a href="#distraction-chart" data-page="distraction-chart">Distraction Chart</a>
+        <a href="#session-summary" data-page="session-summary">Session Summary</a>
+        <a href="#search" data-page="search">🔎 Search</a>
+        <a href="#settings" data-page="settings">⚙ Settings</a>
+        <a href="#help" data-page="help">❓ Help</a>
+        <a href="/join" target="_blank">🎥 Remote Demo</a>
+        <a href="#about" data-page="about">About</a>
+      </nav>
+
+    </aside>
+
+
+    <main class="main">
+
+      <div class="topbar">
+
+        <div class="title">
+          <h1>Dashboard Overview</h1>
+          <p>Monitor student attention and distraction in real time.</p>
+        </div>
+
+        <div class="live">
+          <span class="dot" id="sessionDot"></span>
+          <span id="sessionStatus">SESSION STOPPED</span>
+          <span id="sessionTimer">00:00:00</span>
+        </div>
+
+      </div>
+
+
+      <!-- LIVE CAMERA -->
+      <section class="panel camera-panel app-page" id="cameraSection">
+
+        <div class="panel-head">
+          <h2>Live Monitoring</h2>
+          <span class="tag">Camera + AI</span>
+        </div>
+
+        <div class="camera-layout">
+
+          <div class="camera-wrap">
+            <img id="cameraFeed" src="/video_feed" alt="Live camera feed">
+
+            <div class="camera-placeholder" id="cameraPlaceholder">
+              <strong>Starting camera...</strong>
+              Please wait a moment.
+            </div>
+
+            <div class="camera-overlay">
+              <div class="camera-chip" id="cameraChip">CAMERA STARTING</div>
+              <div class="camera-chip" id="cameraTimeChip">00:00:00</div>
+            </div>
+          </div>
+
+          <div class="session-controls">
+
+            <div class="camera-status">
+              <div class="camera-status-title">Session Status</div>
+              <div class="camera-status-value" id="cameraSessionValue">STOPPED</div>
+            </div>
+
+            <button class="control-btn btn-start" id="startBtn">▶ Start Session</button>
+            <button class="control-btn btn-pause" id="pauseBtn">❚❚ Pause Session</button>
+            <button class="control-btn btn-start" id="endBtn" style="background:#4f46e5">■ End &amp; Save Session</button>
+            <button class="control-btn btn-reset" id="resetBtn">↻ Reset Session</button>
+            <a class="control-btn btn-reset" href="/join" target="_blank" style="display:block;text-align:center;text-decoration:none">🎥 Open Remote Demo</a>
+
+            <div class="camera-status">
+              <div class="camera-status-title">Camera / Remote Students</div>
+              <div class="camera-status-value" id="cameraStatusValue">Connecting...</div>
+            </div>
+
+            <div class="camera-status">
+              <div class="camera-status-title">Share This Student Link</div>
+              <div style="display:flex;gap:7px;align-items:center;margin-top:6px">
+                <input id="remoteJoinLink" readonly style="flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px 9px;font-size:11px;background:#fafafa;color:var(--text);">
+                <button id="copyJoinLink" class="utility-btn primary" style="white-space:nowrap;padding:8px 10px">Copy</button>
+              </div>
+              <div class="small" id="copyJoinStatus" style="margin-top:6px">Share the same link with multiple students.</div>
+            </div>
+
+            <div class="live-student-panel">
+              <div class="live-student-panel-title">LIVE STUDENTS</div>
+              <div id="liveStudentCards">
+                <div class="no-live-students">No students detected</div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- TOP CARDS -->
+
+      <section class="cards app-page" id="cardsSection">
+
+        <div class="card">
+          <div class="label">Students Detected</div>
+          <div class="value" id="students">0</div>
+          <div class="sub">Currently visible</div>
+        </div>
+
+        <div class="card">
+          <div class="label">Focused Now</div>
+          <div class="value good" id="focused">0</div>
+          <div class="sub">Looking at screen</div>
+        </div>
+
+        <div class="card">
+          <div class="label">Distracted Now</div>
+          <div class="value bad" id="distracted">0</div>
+          <div class="sub">Currently away / eyes closed</div>
+        </div>
+
+        <div class="card">
+          <div class="label">Focus Percentage</div>
+          <div class="value" id="focusPercent">0%</div>
+          <div class="sub">Overall current focus</div>
+        </div>
+
+      </section>
+
+
+      <!-- LIVE STUDENTS + SUMMARY -->
+
+      <section class="grid2 app-page" id="studentSection">
+
+        <div class="panel">
+
+          <div class="panel-head">
+            <h2>Live Student Status</h2>
+            <span class="tag" id="studentTag">0 students</span>
+          </div>
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Status</th>
+                <th>Direction</th>
+                <th>Attention</th>
+                <th>Total Distractions</th>
+              </tr>
+            </thead>
+
+            <tbody id="studentTable"></tbody>
+
+          </table>
+
+        </div>
+
+
+        <div class="panel app-page" id="summarySection">
+
+          <div class="panel-head">
+            <h2>Session Summary</h2>
+            <span class="tag">Live</span>
+          </div>
+
+          <div class="info">
+
+            <div class="info-box">
+              <div class="info-title">Total Distractions</div>
+              <div class="info-value" id="totalDistractions">0</div>
+            </div>
+
+            <div class="info-box">
+              <div class="info-title">Focused Students</div>
+              <div class="info-value" id="summaryFocused">0</div>
+            </div>
+
+            <div class="info-box">
+              <div class="info-title">Distracted Students</div>
+              <div class="info-value" id="summaryDistracted">0</div>
+            </div>
+
+            <div class="info-box">
+              <div class="info-title">Current Focus Rate</div>
+              <div class="info-value" id="summaryFocus">0%</div>
+            </div>
+
+          </div>
+
+
+          <div style="margin-top:18px" class="attention">
+
+            <div>
+
+              <div class="rowline">
+                <span>Focus level</span>
+                <strong id="focusLabel">0%</strong>
+              </div>
+
+              <div class="meter">
+                <div class="fill" id="focusBar" style="width:0%"></div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+<!-- FOCUS VS DISTRACTION -->
+
+<section class="panel app-page" id="focusSection" style="margin-top:20px">
+
+  <div class="panel-head">
+    <h2>Focus vs Distraction</h2>
+    <span class="tag">Current Status</span>
+  </div>
+
+  <div style="
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+  ">
+
+    <div class="info-box">
+      <div class="info-title">Focus Level</div>
+
+      <div style="
+        font-size:32px;
+        font-weight:800;
+        color:#16a34a;
+        margin:8px 0 12px;
+      " id="visualFocus">
+        0%
+      </div>
+
+      <div class="meter">
+        <div
+          class="fill"
+          id="visualFocusBar"
+          style="width:0%; background:#16a34a;"
+        ></div>
+      </div>
+    </div>
+
+
+    <div class="info-box">
+      <div class="info-title">Distraction Level</div>
+
+      <div style="
+        font-size:32px;
+        font-weight:800;
+        color:#dc2626;
+        margin:8px 0 12px;
+      " id="visualDistraction">
+        0%
+      </div>
+
+      <div class="meter">
+        <div
+          class="fill"
+          id="visualDistractionBar"
+          style="width:0%; background:#dc2626;"
+        ></div>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+      <!-- CHART -->
+
+      <section class="panel chart-panel app-page" id="chartSection">
+
+        <div class="panel-head">
+
+          <h2>Distraction Overview</h2>
+
+          <span class="tag">
+            Last 20 updates
+          </span>
+
+        </div>
+
+
+        <div class="chart-wrap">
+          <canvas id="distractionChart"></canvas>
+        </div>
+
+
+        <div class="chart-stats">
+
+          <div class="chart-stat">
+            <div class="chart-stat-title">
+              Current Focus
+            </div>
+
+            <div class="chart-stat-value" id="chartFocus">
+              0%
+            </div>
+          </div>
+
+
+          <div class="chart-stat">
+            <div class="chart-stat-title">
+              Current Distracted
+            </div>
+
+            <div class="chart-stat-value" id="chartDistracted">
+              0
+            </div>
+          </div>
+
+
+          <div class="chart-stat">
+            <div class="chart-stat-title">
+              Total Distractions
+            </div>
+
+            <div class="chart-stat-value" id="chartTotal">
+              0
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- SESSION REPORT -->
+
+      <section class="panel app-page" id="reportSection" style="margin-top:20px">
+
+        <div class="panel-head">
+          <h2>Session Report</h2>
+          <span class="tag" id="reportStatus">READY</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px">
+
+          <div class="info-box">
+            <div class="info-title">Session Duration</div>
+            <div class="info-value" id="reportDuration">00:00:00</div>
+          </div>
+
+          <div class="info-box">
+            <div class="info-title">Students Detected</div>
+            <div class="info-value" id="reportStudents">0</div>
+          </div>
+
+          <div class="info-box">
+            <div class="info-title">Average Focus</div>
+            <div class="info-value" id="reportFocus">0%</div>
+          </div>
+
+          <div class="info-box">
+            <div class="info-title">Total Distractions</div>
+            <div class="info-value" id="reportDistractions">0</div>
+          </div>
+
+        </div>
+
+        <div class="info-box">
+          <div class="info-title">Student-wise Session Performance</div>
+          <div id="reportStudentsList" style="margin-top:12px;display:grid;gap:8px">
+            <div class="small">Session data will appear here.</div>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- STORAGE ROOM -->
+
+      <section class="panel app-page" id="storageSection" style="margin-top:20px">
+
+        <div class="panel-head">
+          <h2>🗄 Storage Room</h2>
+          <span class="tag">Persistent student reports</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px">
+          <div class="info-box">
+            <div class="info-title">Stored Reports</div>
+            <div class="info-value" id="storageCount">0</div>
+          </div>
+          <div class="info-box">
+            <div class="info-title">Latest Saved</div>
+            <div class="info-value" id="storageLatest" style="font-size:15px">—</div>
+          </div>
+          <div class="info-box">
+            <div class="info-title">Stored Distractions</div>
+            <div class="info-value" id="storageDistractions">0</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+          <input id="storageSearchInput" class="text-input" type="search" placeholder="Search saved student reports..." autocomplete="off" style="flex:1;min-width:220px">
+          <button class="utility-btn" id="storageRefreshBtn">Refresh</button>
+          <button class="utility-btn" id="storageClearBtn">Clear Storage</button>
+        </div>
+
+        <div class="small" id="storageHint" style="margin-bottom:10px">Reports are automatically saved when a student leaves, the session is ended, or the session is reset.</div>
+
+        <div class="panel" style="padding:0;box-shadow:none;overflow-x:auto">
+          <table style="min-width:900px">
+            <thead>
+              <tr>
+                <th>Saved</th>
+                <th>Student</th>
+                <th>Duration</th>
+                <th>Attention</th>
+                <th>Last Direction</th>
+                <th>Distractions</th>
+                <th>End Reason</th>
+              </tr>
+            </thead>
+            <tbody id="storageTableBody">
+              <tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:28px">No saved reports yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="small" style="margin-top:10px">Data is stored on the Flask computer in <strong>storage_room.json</strong>.</div>
+
+      </section>
+
+
+      <!-- SEARCH -->
+      <section class="panel app-page" id="searchSection" style="margin-top:20px">
+
+        <div class="panel-head">
+          <h2>Search Students</h2>
+          <span class="tag">Live session data</span>
+        </div>
+
+        <div class="search-bar">
+          <input
+            id="studentSearchInput"
+            class="text-input"
+            type="search"
+            placeholder="Search by Student ID, status or direction..."
+            autocomplete="off"
+          >
+          <button class="utility-btn primary" id="studentSearchBtn">Search</button>
+          <button class="utility-btn" id="studentSearchClear">Clear</button>
+        </div>
+
+        <div class="small" id="searchHint" style="margin-bottom:10px">
+          Example: Student 1, FOCUSED, DISTRACTED, LEFT, RIGHT, CENTER
+        </div>
+
+        <div class="search-results" id="studentSearchResults">
+          <div class="search-empty">
+            Enter a search term to find a currently detected student.
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- SETTINGS -->
+      <section class="panel app-page" id="settingsSection" style="margin-top:20px">
+
+        <div class="panel-head">
+          <h2>Settings</h2>
+          <span class="tag">Saved on this device</span>
+        </div>
+
+        <div class="settings-list">
+
+          <div class="setting-row">
+            <div>
+              <div class="setting-title">Appearance</div>
+              <div class="setting-note">Choose light or dark dashboard appearance.</div>
+            </div>
+            <select id="themeSetting" class="select-input">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <div class="setting-title">Dashboard Refresh</div>
+              <div class="setting-note">How often the dashboard fetches live AI data.</div>
+            </div>
+            <select id="refreshSetting" class="select-input">
+              <option value="1000">1 second</option>
+              <option value="2000">2 seconds</option>
+              <option value="3000">3 seconds</option>
+            </select>
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <div class="setting-title">Compact Mode</div>
+              <div class="setting-note">Reduce spacing so more dashboard information fits on screen.</div>
+            </div>
+            <select id="compactSetting" class="select-input">
+              <option value="off">Off</option>
+              <option value="on">On</option>
+            </select>
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <div class="setting-title">AI Detection Thresholds</div>
+              <div class="setting-note">Current backend values used by the detector. These are informational in this page.</div>
+            </div>
+            <div style="font-size:12px;line-height:1.7;color:var(--muted)">
+              Look-away: <strong style="color:var(--text)">1.0s</strong><br>
+              Eyes closed: <strong style="color:var(--text)">1.5s</strong>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="setting-actions">
+          <button class="utility-btn" id="resetSettingsBtn">Reset Settings</button>
+          <span class="small" id="settingsSavedText" style="align-self:center"></span>
+        </div>
+
+      </section>
+
+
+      <!-- HELP -->
+      <section class="panel app-page" id="helpSection" style="margin-top:20px">
+
+        <div class="panel-head">
+          <h2>Help &amp; Quick Guide</h2>
+          <span class="tag">How to use the app</span>
+        </div>
+
+        <div class="help-grid">
+
+          <details class="help-item">
+            <summary>How do I start a session?</summary>
+            <div class="help-content">
+              Open Live Monitoring and click <strong>Start Session</strong>. The timer and attention metrics will begin updating from the camera data.
+            </div>
+          </details>
+
+          <details class="help-item">
+            <summary>What counts as distraction?</summary>
+            <div class="help-content">
+              The current prototype marks a student as distracted when the configured face-direction or eye-closure condition remains active long enough to cross its backend threshold.
+            </div>
+          </details>
+
+          <details class="help-item">
+            <summary>Why is the camera not showing?</summary>
+            <div class="help-content">
+              Make sure the Flask app is running, the camera is available to the computer, and no other application is currently using the camera. Refresh the app after checking.
+            </div>
+          </details>
+
+          <details class="help-item">
+            <summary>How do I use Remote Demo?</summary>
+            <div class="help-content">
+              Open <strong>Remote Demo</strong> or share the same <strong>/join</strong> link with multiple students. Each student enters a name or roll number and clicks <strong>Join with Camera</strong>. Every connected student is shown separately on the dashboard.
+            </div>
+          </details>
+
+          <details class="help-item">
+            <summary>What do Search and Session Report show?</summary>
+            <div class="help-content">
+              Search filters currently detected students. Session Report summarizes the current session duration, focus percentage, total distractions, and student-wise status.
+            </div>
+          </details>
+
+          <details class="help-item">
+            <summary>What is Storage Room?</summary>
+            <div class="help-content">
+              Storage Room keeps a persistent copy of student session reports. A report is saved when a student leaves, when the presenter ends the session, or when the session is reset. It stores duration, attention, last direction, distraction time, distraction percentage, and distraction count.
+            </div>
+          </details>
+
+        </div>
+
+        <div style="margin-top:16px">
+          <div class="info-title">Keyboard shortcuts used by the original detector</div>
+          <div class="shortcut-grid">
+            <div class="shortcut"><span class="key">S</span><div class="small" style="margin-top:7px">Start</div></div>
+            <div class="shortcut"><span class="key">P</span><div class="small" style="margin-top:7px">Pause</div></div>
+            <div class="shortcut"><span class="key">R</span><div class="small" style="margin-top:7px">Reset</div></div>
+            <div class="shortcut"><span class="key">Q</span><div class="small" style="margin-top:7px">Quit</div></div>
+          </div>
+          <div class="small" style="margin-top:9px">
+            In the current unified app, use the on-screen session buttons for the safest and clearest workflow.
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ABOUT -->
+
+      <section class="panel app-page" id="aboutSection" style="margin-top:20px">
+
+        <div class="panel-head">
+
+          <h2>About This Prototype</h2>
+
+          <span class="tag">
+            College Project
+          </span>
+
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.25fr .75fr;gap:18px;align-items:stretch">
+
+          <div class="info-box" style="padding:18px">
+            <div class="info-title" style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:8px">About STARFLASH</div>
+            <div class="small" style="line-height:1.75">
+              <strong style="color:var(--text)">STARFLASH</strong> is an AI-powered student attention monitoring system designed to help understand focus and distraction during classroom or study sessions.
+              It uses computer vision, facial landmarks, head-direction analysis, and eye-state detection to provide live attention insights through an interactive dashboard.
+            </div>
+            <div class="small" style="line-height:1.75;margin-top:10px">
+              The system also supports remote student participation, session reports, and a <strong style="color:var(--text)">Storage Room</strong> for keeping completed session records for later reference.
+            </div>
+          </div>
+
+          <div class="info-box" style="padding:18px">
+            <div class="info-title" style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:10px">Project Information</div>
+            <div class="small" style="line-height:1.8">
+              <strong style="color:var(--text)">Project By:</strong><br>
+              Tejas Kailas Rahane
+              <br><br>
+              <strong style="color:var(--text)">College:</strong><br>
+              K.J. Somaiya College of Arts, Commerce &amp; Science, Kopargaon
+              <br><br>
+              <strong style="color:var(--text)">Technology:</strong><br>
+              Python • Flask • OpenCV • MediaPipe • HTML • CSS • JavaScript
+            </div>
+          </div>
+
+        </div>
+
+        <div class="info-box" style="margin-top:16px;text-align:center;padding:18px;background:linear-gradient(135deg,#eef2ff,#eff6ff)">
+          <div style="font-size:16px;font-weight:800;color:var(--accent)">Better Focus. Better Learning. Brighter Future. ⭐⚡</div>
+          <div class="small" style="margin-top:6px">College Project • AI Attention Monitoring Prototype</div>
+        </div>
+<video 
+  controls 
+  playsinline 
+  preload="metadata" 
+  style="
+    width:100%; 
+    max-height:520px; 
+    display:block; 
+    border-radius:14px; 
+    background:#020617; 
+    box-shadow:0 12px 30px rgba(17,24,39,.12); 
+  "
+>
+  <source src="/project_video" type="video/mp4"> 
+  Your browser does not support the video player. 
+</video>
+     <div class="info-box" style="margin-top:18px;padding:18px">
+  <div class="info-title"
+       style="font-size:13px;font-weight:800;color:var(--text);margin-bottom:12px">
+    STARFLASH Project Video
+  </div>
+
+  <div class="small" style="margin-top:10px;text-align:center">
+    STARFLASH — Smart Technology for Smarter Classrooms
+  </div>
+</div>
+
+</section>
+      <div class="footer">
+        STARFLASH • Real-time prototype dashboard
+      </div>
+
+    </main>
+
+  </div>
+
+
+  <script>
+
+
+  /* App-style page navigation: show one section at a time */
+  (function(){
+    const pageConfig = {
+      dashboard: {
+        title: 'Dashboard Overview',
+        subtitle: 'Quick view of the current attention session.',
+        sections: ['cardsSection','focusSection']
+      },
+      'live-monitoring': {
+        title: 'Live Monitoring',
+        subtitle: 'Camera feed, AI detection and session controls.',
+        sections: ['cameraSection']
+      },
+      'live-students': {
+        title: 'Live Students',
+        subtitle: 'Current student status, direction, attention and distraction count.',
+        sections: ['studentSection']
+      },
+      'session-report': {
+        title: 'Session Report',
+        subtitle: 'Current session performance and student-wise metrics.',
+        sections: ['reportSection']
+      },
+      'storage-room': {
+        title: 'Storage Room',
+        subtitle: 'Saved student reports from completed or ended sessions.',
+        sections: ['storageSection']
+      },
+      'distraction-chart': {
+        title: 'Distraction Chart',
+        subtitle: 'Visual trend of focus, distracted students and distraction events.',
+        sections: ['chartSection']
+      },
+      'session-summary': {
+        title: 'Session Summary',
+        subtitle: 'Live summary of focus and distraction across the session.',
+        sections: ['summarySection']
+      },
+      search: {
+        title: 'Search',
+        subtitle: 'Find currently detected students and inspect their live status.',
+        sections: ['searchSection']
+      },
+      settings: {
+        title: 'Settings',
+        subtitle: 'Customize dashboard appearance and update behavior.',
+        sections: ['settingsSection']
+      },
+      help: {
+        title: 'Help & Quick Guide',
+        subtitle: 'Learn how to use the detector and remote demo.',
+        sections: ['helpSection']
+      },
+      about: {
+        title: 'About',
+        subtitle: 'Information about this STARFLASH prototype.',
+        sections: ['aboutSection']
+      }
+    };
+
+    const allSections = [
+      'cardsSection','cameraSection','studentSection','focusSection',
+      'summarySection','chartSection','reportSection','storageSection',
+      'searchSection','settingsSection','helpSection','aboutSection'
+    ];
+
+    const titleEl = document.querySelector('.title h1');
+    const subtitleEl = document.querySelector('.title p');
+    const navLinks = [...document.querySelectorAll('#appNav a[data-page]')];
+    const studentGrid = document.getElementById('studentSection');
+    const summarySection = document.getElementById('summarySection');
+
+    // Move Session Summary out of the Live Students grid so it can behave as its own page.
+    if(studentGrid && summarySection && summarySection.parentElement === studentGrid){
+      studentGrid.insertAdjacentElement('afterend', summarySection);
+    }
+
+    function setActivePage(page, push=true){
+      const config = pageConfig[page] || pageConfig.dashboard;
+      const safePage = pageConfig[page] ? page : 'dashboard';
+
+      allSections.forEach(id=>{
+        const el = document.getElementById(id);
+        if(el) el.classList.toggle('page-active', config.sections.includes(id));
+      });
+
+      navLinks.forEach(link=>{
+        link.classList.toggle('active', link.dataset.page === safePage);
+      });
+
+      if(titleEl) titleEl.textContent = config.title;
+      if(subtitleEl) subtitleEl.textContent = config.subtitle;
+
+      window.scrollTo({top:0, behavior:'smooth'});
+
+      if(push){
+        history.pushState({page:safePage}, '', '#' + safePage);
+      }
+
+      // Chart.js needs a resize when its canvas becomes visible.
+      setTimeout(()=>{
+        if(window.distractionChart && typeof window.distractionChart.resize === 'function'){
+          window.distractionChart.resize();
+        }
+      }, 80);
+    }
+
+    navLinks.forEach(link=>{
+      link.addEventListener('click', event=>{
+        event.preventDefault();
+        setActivePage(link.dataset.page);
+      });
+    });
+
+    window.addEventListener('popstate', ()=>{
+      const page = (location.hash || '#dashboard').slice(1);
+      setActivePage(page || 'dashboard', false);
+    });
+
+    const initialPage = (location.hash || '#dashboard').slice(1);
+    setActivePage(initialPage || 'dashboard', false);
+  })();
+
+  /* STARFLASH cinematic 10-second splash animation */
+  window.addEventListener("load", () => {
+    const splash = document.getElementById("splash");
+    const progressBar = document.getElementById("splashProgressBar");
+    const progressText = document.getElementById("splashProgressText");
+    const statusText = document.getElementById("splashStatusText");
+
+    const steps = [
+      [6, "BOOTING STARFLASH CORE..."],
+      [17, "CALIBRATING VISION SENSOR..."],
+      [28, "INITIALIZING FACE LANDMARK ENGINE..."],
+      [40, "SYNCING ATTENTION MONITOR..."],
+      [52, "LOADING DISTRACTION ANALYTICS..."],
+      [64, "BUILDING LIVE STUDENT MATRIX..."],
+      [76, "CONNECTING REMOTE CAMERA CHANNEL..."],
+      [88, "VERIFYING AI RESPONSE PIPELINE..."],
+      [96, "SYSTEM CHECK COMPLETE..."],
+      [100, "STARFLASH ONLINE // READY"]
+    ];
+
+    const start = performance.now();
+    const duration = 10000;
+    let lastStep = -1;
+
+    function tick(now) {
+      const elapsed = Math.min(now - start, duration);
+      const progress = elapsed / duration;
+      const stepIndex = Math.min(steps.length - 1, Math.floor(progress * steps.length));
+
+      if (stepIndex !== lastStep) {
+        const [value, message] = steps[stepIndex];
+        progressBar.style.width = value + "%";
+        progressText.textContent = value + "%";
+        statusText.textContent = message;
+        lastStep = stepIndex;
+      }
+
+      if (elapsed < duration) {
+        requestAnimationFrame(tick);
+      } else {
+        progressBar.style.width = "100%";
+        progressText.textContent = "100%";
+        statusText.textContent = "STARFLASH ONLINE // READY";
+        setTimeout(() => splash.classList.add("hide"), 260);
+      }
+    }
+
+    requestAnimationFrame(tick);
+  });
+
+  /* PWA service worker */
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/static/sw.js").catch(() => {});
+    });
+  }
+
+  /* Chart data */
+  const chartLabels = [];
+  const focusHistory = [];
+  const distractedHistory = [];
+  const totalHistory = [];
+  const maxPoints = 20;
+
+  const ctx = document
+    .getElementById("distractionChart")
+    .getContext("2d");
+
+  window.distractionChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: chartLabels,
+      datasets: [
+        {
+          label: "Focus %",
+          data: focusHistory,
+          borderColor: "#16a34a",
+          backgroundColor: "rgba(22,163,74,0.08)",
+          borderWidth: 3,
+          tension: 0.35,
+          fill: true,
+          pointRadius: 3
+        },
+        {
+          label: "Distracted Students",
+          data: distractedHistory,
+          borderColor: "#dc2626",
+          backgroundColor: "rgba(220,38,38,0.06)",
+          borderWidth: 3,
+          tension: 0.35,
+          fill: true,
+          pointRadius: 3
+        },
+        {
+          label: "Total Distractions",
+          data: totalHistory,
+          borderColor: "#4f46e5",
+          backgroundColor: "rgba(79,70,229,0.05)",
+          borderWidth: 3,
+          tension: 0.35,
+          fill: false,
+          pointRadius: 3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { intersect: false, mode: "index" },
+      plugins: { legend: { display: true, position: "top" } },
+      scales: {
+        y: { beginAtZero: true, suggestedMax: 100 },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  function updateChart(focus, distracted, total) {
+    const now = new Date();
+    const label =
+      String(now.getHours()).padStart(2, "0") + ":" +
+      String(now.getMinutes()).padStart(2, "0") + ":" +
+      String(now.getSeconds()).padStart(2, "0");
+
+    chartLabels.push(label);
+    focusHistory.push(focus);
+    distractedHistory.push(distracted);
+    totalHistory.push(total);
+
+    if (chartLabels.length > maxPoints) {
+      chartLabels.shift();
+      focusHistory.shift();
+      distractedHistory.shift();
+      totalHistory.shift();
+    }
+
+    distractionChart.update("none");
+  }
+
+  /* Session timer synced with server */
+  let sessionRunning = false;
+  let sessionAnchorValue = 0;
+  let sessionAnchorTime = performance.now();
+
+  function formatSessionTime(seconds) {
+    const total = Math.max(0, Math.floor(seconds));
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    return String(h).padStart(2, "0") + ":" +
+           String(m).padStart(2, "0") + ":" +
+           String(s).padStart(2, "0");
+  }
+
+  function updateSessionUI(running, seconds) {
+    sessionRunning = Boolean(running);
+    sessionAnchorValue = Math.max(0, Number(seconds) || 0);
+    sessionAnchorTime = performance.now();
+
+    const label = sessionRunning ? "SESSION RUNNING" : "SESSION STOPPED";
+    document.getElementById("sessionStatus").textContent = label;
+    document.getElementById("cameraSessionValue").textContent = sessionRunning ? "RUNNING" : "STOPPED";
+    document.getElementById("sessionDot").style.background = sessionRunning ? "#16a34a" : "#9ca3af";
+    document.getElementById("sessionTimer").textContent = formatSessionTime(sessionAnchorValue);
+    document.getElementById("cameraTimeChip").textContent = formatSessionTime(sessionAnchorValue);
+  }
+
+  function renderSessionTimer() {
+    let value = sessionAnchorValue;
+    if (sessionRunning) {
+      value += (performance.now() - sessionAnchorTime) / 1000;
+    }
+    const text = formatSessionTime(value);
+    document.getElementById("sessionTimer").textContent = text;
+    document.getElementById("cameraTimeChip").textContent = text;
+  }
+
+  setInterval(renderSessionTimer, 100);
+
+  async function sessionAction(action) {
+    try {
+      const response = await fetch("/api/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action })
+      });
+      const data = await response.json();
+      if (data.success) {
+        updateSessionUI(data.session_running, data.session_time);
+        if (action === "end" || action === "reset") {
+          loadStorageRoom();
+          if (action === "end") {
+            const saved = Number(data.saved_reports || 0);
+            const hint = document.getElementById("storageHint");
+            if (hint) hint.textContent = saved > 0
+              ? `${saved} student report${saved === 1 ? "" : "s"} saved in Storage Room.`
+              : "Session ended. No new student report needed to be saved.";
+          }
+        }
+      }
+    } catch (error) {
+      console.log("Session control error:", error);
+    }
+  }
+
+  document.getElementById("startBtn").addEventListener("click", () => sessionAction("start"));
+  document.getElementById("pauseBtn").addEventListener("click", () => sessionAction("pause"));
+  document.getElementById("endBtn").addEventListener("click", () => sessionAction("end"));
+  document.getElementById("resetBtn").addEventListener("click", () => sessionAction("reset"));
+
+  const cameraFeed = document.getElementById("cameraFeed");
+  cameraFeed.addEventListener("load", () => {
+    document.getElementById("cameraPlaceholder").style.display = "none";
+    document.getElementById("cameraChip").textContent = "CAMERA LIVE";
+    document.getElementById("cameraStatusValue").textContent = "Connected";
+  });
+
+  function updateLiveStudentCards(status) {
+    const container = document.getElementById("liveStudentCards");
+    if (!container) return;
+
+    const entries = Object.entries(status || {});
+    container.innerHTML = "";
+
+    if (entries.length === 0) {
+      container.innerHTML = `<div class="no-live-students">No students detected</div>`;
+      return;
+    }
+
+    entries.forEach(([studentId, student]) => {
+      const statusText = String(student.status || "UNKNOWN");
+      const studentName = student.name || `Student ${studentId}`;
+      const isFocused = statusText.toUpperCase() === "FOCUSED";
+      const card = document.createElement("div");
+      card.className = "student-mini-card";
+
+      card.innerHTML = `
+        <div class="student-mini-top">
+          <div class="student-mini-name">${studentName}</div>
+          <div class="student-mini-status ${isFocused ? "focused" : "distracted"}">● ${statusText}</div>
+        </div>
+        <div class="student-mini-row"><span>Direction</span><strong>${student.direction ?? "CENTER"}</strong></div>
+        <div class="student-mini-row"><span>Attention</span><strong>${student.attention ?? 0}%</strong></div>
+        <div class="student-mini-row"><span>Distractions</span><strong>${student.total_distractions ?? 0}</strong></div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+
+  function formatReportTime(seconds) {
+    seconds = Math.max(0, Math.floor(seconds));
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return String(hours).padStart(2, "0") + ":" +
+           String(minutes).padStart(2, "0") + ":" +
+           String(secs).padStart(2, "0");
+  }
+
+
+  function updateSessionReport(data) {
+    const reportStatus = document.getElementById("reportStatus");
+    const reportDuration = document.getElementById("reportDuration");
+    const reportStudents = document.getElementById("reportStudents");
+    const reportFocus = document.getElementById("reportFocus");
+    const reportDistractions = document.getElementById("reportDistractions");
+    const studentList = document.getElementById("reportStudentsList");
+
+    if (!reportStatus || !reportDuration || !reportStudents || !reportFocus || !reportDistractions || !studentList) return;
+
+    const running = Boolean(data.session_running);
+    const sessionTime = Number(data.session_time ?? 0);
+    const students = Number(data.students ?? 0);
+    const focus = Number(data.focus_percent ?? 0);
+    const totalDistractions = Number(data.total_distractions ?? 0);
+
+    reportStatus.textContent = running ? "LIVE" : (sessionTime > 0 ? "COMPLETED" : "READY");
+    reportStatus.style.background = running ? "#ecfdf3" : (sessionTime > 0 ? "#eef2ff" : "#f3f4f6");
+    reportStatus.style.color = running ? "#166534" : (sessionTime > 0 ? "#3730a3" : "#6b7280");
+
+    reportDuration.textContent = formatReportTime(sessionTime);
+    reportStudents.textContent = students;
+    reportFocus.textContent = focus + "%";
+    reportDistractions.textContent = totalDistractions;
+
+    studentList.innerHTML = "";
+    const entries = Object.entries(data.student_status || {});
+
+    if (entries.length === 0) {
+      studentList.innerHTML = `<div class="small">No student session data available.</div>`;
+      return;
+    }
+
+    entries.forEach(([studentId, student]) => {
+      const attention = Number(student.attention ?? 0);
+      const distractions = Number(student.total_distractions ?? 0);
+      const status = student.status ?? "UNKNOWN";
+      const studentName = student.name || `Student ${studentId}`;
+      const direction = student.direction ?? "CENTER";
+      const isFocused = status.toUpperCase() === "FOCUSED";
+
+      const card = document.createElement("div");
+      card.style.cssText = "display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:10px;align-items:center;padding:12px;border:1px solid #e5e7eb;border-radius:10px;background:#ffffff;";
+
+      card.innerHTML = `
+        <div><strong>${studentName}</strong></div>
+        <div><span style="font-size:11px;font-weight:800;padding:5px 8px;border-radius:999px;background:${isFocused ? "#ecfdf3" : "#fef2f2"};color:${isFocused ? "#166534" : "#991b1b"};">${status}</span></div>
+        <div style="font-size:12px;color:#6b7280;">Attention: <strong style="color:#172033">${attention}%</strong></div>
+        <div style="font-size:12px;color:#6b7280;">Distractions: <strong style="color:#172033">${distractions}</strong><br>Direction: <strong style="color:#172033">${direction}</strong></div>
+      `;
+
+      studentList.appendChild(card);
+    });
+  }
+
+
+
+
+  /* STORAGE ROOM */
+  let storageReports = [];
+
+  function storageFormatDuration(seconds) {
+    const total = Math.max(0, Math.floor(Number(seconds) || 0));
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const sec = total % 60;
+    return String(h).padStart(2, "0") + ":" +
+           String(m).padStart(2, "0") + ":" +
+           String(sec).padStart(2, "0");
+  }
+
+  function storageFormatDate(value) {
+    if (!value) return "—";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString();
+  }
+
+  function escapeStorageHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function renderStorageRoom() {
+    const body = document.getElementById("storageTableBody");
+    const count = document.getElementById("storageCount");
+    const latest = document.getElementById("storageLatest");
+    const distractions = document.getElementById("storageDistractions");
+    const search = (document.getElementById("storageSearchInput")?.value || "").trim().toLowerCase();
+
+    if (!body) return;
+
+    const filtered = storageReports.filter(report => {
+      if (!search) return true;
+      const haystack = [
+        report.student_name,
+        report.student_id,
+        report.session_id,
+        report.last_direction,
+        report.end_reason,
+        report.last_status,
+        report.attention_percent,
+        report.total_distractions
+      ].join(" ").toLowerCase();
+      return haystack.includes(search);
+    });
+
+    count.textContent = storageReports.length;
+    latest.textContent = storageReports.length ? storageFormatDate(storageReports[0].saved_at) : "—";
+    distractions.textContent = storageReports.reduce((sum, report) => sum + Number(report.total_distractions || 0), 0);
+
+    if (!filtered.length) {
+      body.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:28px">${storageReports.length ? "No matching saved reports." : "No saved reports yet."}</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = filtered.map(report => `
+      <tr>
+        <td>${escapeStorageHtml(storageFormatDate(report.saved_at))}</td>
+        <td><strong>${escapeStorageHtml(report.student_name || report.student_id)}</strong><div class="small">${escapeStorageHtml(report.student_id || "")}</div></td>
+        <td>${escapeStorageHtml(storageFormatDuration(report.duration_seconds))}</td>
+        <td>${Number(report.attention_percent ?? 0).toFixed(1)}%</td>
+        <td>${escapeStorageHtml(report.last_direction || "CENTER")}</td>
+        <td><strong>${Number(report.total_distractions || 0)}</strong><div class="small">${Number(report.distraction_percent || 0).toFixed(1)}% distracted</div></td>
+        <td>${escapeStorageHtml(report.end_reason || "—")}</td>
+      </tr>
+    `).join("");
+  }
+
+  async function loadStorageRoom() {
+    try {
+      const response = await fetch("/api/storage-room", { cache: "no-store" });
+      const data = await response.json();
+      if (data.success) {
+        storageReports = Array.isArray(data.reports) ? data.reports : [];
+        renderStorageRoom();
+      }
+    } catch (error) {
+      console.log("Storage Room load error:", error);
+    }
+  }
+
+  async function clearStorageRoom() {
+    if (!storageReports.length) return;
+    if (!window.confirm("Clear all saved student reports from Storage Room?")) return;
+
+    try {
+      const response = await fetch("/api/storage-room/clear", { method: "POST" });
+      const data = await response.json();
+      if (data.success) {
+        storageReports = [];
+        renderStorageRoom();
+        const hint = document.getElementById("storageHint");
+        if (hint) hint.textContent = "Storage Room cleared.";
+      }
+    } catch (error) {
+      console.log("Storage Room clear error:", error);
+    }
+  }
+
+  document.getElementById("storageRefreshBtn")?.addEventListener("click", loadStorageRoom);
+  document.getElementById("storageClearBtn")?.addEventListener("click", clearStorageRoom);
+  document.getElementById("storageSearchInput")?.addEventListener("input", renderStorageRoom);
+  loadStorageRoom();
+  setInterval(loadStorageRoom, 3000);
+
+  /* SEARCH + SETTINGS */
+  let lastDashboardData = {};
+  let dashboardRefreshMs = Number(localStorage.getItem("sdd_refresh_ms") || 1000);
+  let dashboardTimerId = null;
+
+  function applyTheme(theme) {
+    document.body.classList.toggle("dark", theme === "dark");
+  }
+
+  function applyCompact(compact) {
+    document.body.classList.toggle("compact", compact === "on");
+  }
+
+  function showSettingsSaved(text = "Settings saved") {
+    const el = document.getElementById("settingsSavedText");
+    if (!el) return;
+    el.textContent = text;
+    clearTimeout(window.__settingsSaveTimer);
+    window.__settingsSaveTimer = setTimeout(() => {
+      el.textContent = "";
+    }, 1600);
+  }
+
+  function loadSettings() {
+    const theme = localStorage.getItem("sdd_theme") || "light";
+    const compact = localStorage.getItem("sdd_compact") || "off";
+    dashboardRefreshMs = Number(localStorage.getItem("sdd_refresh_ms") || 1000);
+
+    const themeSetting = document.getElementById("themeSetting");
+    const refreshSetting = document.getElementById("refreshSetting");
+    const compactSetting = document.getElementById("compactSetting");
+
+    if (themeSetting) themeSetting.value = theme;
+    if (refreshSetting) refreshSetting.value = String(dashboardRefreshMs);
+    if (compactSetting) compactSetting.value = compact;
+
+    applyTheme(theme);
+    applyCompact(compact);
+  }
+
+  function restartDashboardTimer() {
+    if (dashboardTimerId) {
+      clearInterval(dashboardTimerId);
+    }
+    dashboardTimerId = setInterval(updateDashboard, dashboardRefreshMs);
+  }
+
+  function saveAndApplySettings() {
+    const theme = document.getElementById("themeSetting")?.value || "light";
+    const refresh = Number(document.getElementById("refreshSetting")?.value || 1000);
+    const compact = document.getElementById("compactSetting")?.value || "off";
+
+    localStorage.setItem("sdd_theme", theme);
+    localStorage.setItem("sdd_refresh_ms", String(refresh));
+    localStorage.setItem("sdd_compact", compact);
+
+    dashboardRefreshMs = refresh;
+    applyTheme(theme);
+    applyCompact(compact);
+    restartDashboardTimer();
+    showSettingsSaved();
+  }
+
+  function resetSettings() {
+    localStorage.removeItem("sdd_theme");
+    localStorage.removeItem("sdd_refresh_ms");
+    localStorage.removeItem("sdd_compact");
+    loadSettings();
+    restartDashboardTimer();
+    showSettingsSaved("Settings reset");
+  }
+
+  function performStudentSearch() {
+    const input = document.getElementById("studentSearchInput");
+    const results = document.getElementById("studentSearchResults");
+    const hint = document.getElementById("searchHint");
+    if (!input || !results) return;
+
+    const query = input.value.trim().toLowerCase();
+    const status = lastDashboardData.student_status || {};
+    const entries = Object.entries(status);
+
+    if (!query) {
+      results.innerHTML = `<div class="search-empty">Enter a search term to find a currently detected student.</div>`;
+      if (hint) hint.textContent = "Example: Student 1, FOCUSED, DISTRACTED, LEFT, RIGHT, CENTER";
+      return;
+    }
+
+    const matches = entries.filter(([studentId, student]) => {
+      const haystack = [
+        `student ${studentId}`,
+        studentId,
+        student.name || "",
+        student.status || "",
+        student.direction || "",
+        String(student.attention ?? ""),
+        String(student.total_distractions ?? "")
+      ].join(" ").toLowerCase();
+      return haystack.includes(query);
+    });
+
+    if (matches.length === 0) {
+      results.innerHTML = `<div class="search-empty">No matching student found in the current live data.</div>`;
+      if (hint) hint.textContent = `No result for “${input.value.trim()}”.`;
+      return;
+    }
+
+    if (hint) hint.textContent = `${matches.length} matching student${matches.length === 1 ? "" : "s"} found.`;
+    results.innerHTML = "";
+
+    matches.forEach(([studentId, student]) => {
+      const statusText = String(student.status || "UNKNOWN");
+      const focused = statusText.toUpperCase() === "FOCUSED";
+      const card = document.createElement("div");
+      card.className = "search-result-card";
+      card.innerHTML = `
+        <div>
+          <span class="result-label">Student</span>
+          <span class="result-value">${student.name || `Student ${studentId}`}</span>
+        </div>
+        <div>
+          <span class="result-label">Status</span>
+          <span class="badge ${focused ? "focus" : "dist"}">● ${statusText}</span>
+        </div>
+        <div>
+          <span class="result-label">Direction</span>
+          <span class="result-value">${student.direction ?? "CENTER"}</span>
+        </div>
+        <div>
+          <span class="result-label">Attention / Distractions</span>
+          <span class="result-value">${student.attention ?? 0}% / ${student.total_distractions ?? 0}</span>
+        </div>
+      `;
+      results.appendChild(card);
+    });
+  }
+
+  function clearStudentSearch() {
+    const input = document.getElementById("studentSearchInput");
+    const results = document.getElementById("studentSearchResults");
+    const hint = document.getElementById("searchHint");
+    if (input) input.value = "";
+    if (results) results.innerHTML = `<div class="search-empty">Enter a search term to find a currently detected student.</div>`;
+    if (hint) hint.textContent = "Example: Student 1, FOCUSED, DISTRACTED, LEFT, RIGHT, CENTER";
+  }
+
+  document.getElementById("studentSearchBtn")?.addEventListener("click", performStudentSearch);
+  document.getElementById("studentSearchClear")?.addEventListener("click", clearStudentSearch);
+  document.getElementById("studentSearchInput")?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") performStudentSearch();
+    if (event.key === "Escape") clearStudentSearch();
+  });
+
+  ["themeSetting", "refreshSetting", "compactSetting"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("change", saveAndApplySettings);
+  });
+
+  document.getElementById("resetSettingsBtn")?.addEventListener("click", resetSettings);
+
+  loadSettings();
+
+
+  /* Remote join link */
+  const remoteJoinLink = document.getElementById("remoteJoinLink");
+  const copyJoinLink = document.getElementById("copyJoinLink");
+  const copyJoinStatus = document.getElementById("copyJoinStatus");
+
+  if (remoteJoinLink) {
+    remoteJoinLink.value = window.location.origin + "/join";
+  }
+
+  copyJoinLink?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(remoteJoinLink.value);
+      if (copyJoinStatus) copyJoinStatus.textContent = "Link copied. Send it to the students in the meeting.";
+      setTimeout(() => {
+        if (copyJoinStatus) copyJoinStatus.textContent = "Share the same link with multiple students.";
+      }, 2200);
+    } catch (error) {
+      remoteJoinLink.select();
+      document.execCommand("copy");
+      if (copyJoinStatus) copyJoinStatus.textContent = "Link copied.";
+    }
+  });
+
+  async function updateDashboard() {
+    try {
+      const response = await fetch("/api/data", { cache: "no-store" });
+      const data = await response.json();
+      lastDashboardData = data;
+
+      const students = data.students ?? 0;
+      const focused = data.focused ?? 0;
+      const distracted = data.distracted ?? 0;
+      const focus = Number(data.focus_percent ?? 0);
+      const total = data.total_distractions ?? 0;
+
+      updateSessionUI(data.session_running ?? false, data.session_time ?? 0);
+
+      document.getElementById("students").textContent = students;
+      document.getElementById("focused").textContent = focused;
+      document.getElementById("distracted").textContent = distracted;
+      document.getElementById("focusPercent").textContent = focus + "%";
+
+      document.getElementById("totalDistractions").textContent = total;
+      document.getElementById("summaryFocused").textContent = focused;
+      document.getElementById("summaryDistracted").textContent = distracted;
+      document.getElementById("summaryFocus").textContent = focus + "%";
+      document.getElementById("focusLabel").textContent = focus + "%";
+      document.getElementById("focusBar").style.width = Math.max(0, Math.min(100, focus)) + "%";
+
+      document.getElementById("studentTag").textContent = students + (students === 1 ? " student" : " students");
+      document.getElementById("chartFocus").textContent = focus + "%";
+      document.getElementById("chartDistracted").textContent = distracted;
+      document.getElementById("chartTotal").textContent = total;
+
+      const distractionPercent = Math.max(0, Math.min(100, 100 - focus));
+      document.getElementById("visualFocus").textContent = focus + "%";
+      document.getElementById("visualDistraction").textContent = distractionPercent + "%";
+      document.getElementById("visualFocusBar").style.width = focus + "%";
+      document.getElementById("visualDistractionBar").style.width = distractionPercent + "%";
+
+      const sourceMode = data.source_mode || "local";
+      const remoteCount = Number(data.remote_students ?? 0);
+      document.getElementById("cameraStatusValue").textContent =
+        sourceMode === "remote"
+          ? `Remote: ${remoteCount} student${remoteCount === 1 ? "" : "s"}`
+          : (data.camera_ok ? "Local camera connected" : "Starting...");
+      document.getElementById("cameraChip").textContent =
+        sourceMode === "remote" ? `REMOTE • ${remoteCount} STUDENT${remoteCount === 1 ? "" : "S"}` : "CAMERA LIVE";
+
+      const table = document.getElementById("studentTable");
+      table.innerHTML = "";
+      const status = data.student_status || {};
+
+      for (const [studentId, student] of Object.entries(status)) {
+        const row = document.createElement("tr");
+        const isFocused = (student.status || "").toUpperCase() === "FOCUSED";
+        row.innerHTML = `
+          <td><strong>${student.name || `Student ${studentId}`}</strong></td>
+          <td><span class="badge ${isFocused ? "focus" : "dist"}">● ${student.status ?? "UNKNOWN"}</span></td>
+          <td>${student.direction ?? "CENTER"}</td>
+          <td>${student.attention ?? 0}%</td>
+          <td><strong>${student.total_distractions ?? 0}</strong></td>
+        `;
+        table.appendChild(row);
+      }
+
+      if (Object.keys(status).length === 0) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td colspan="5" style="text-align:center;color:#9ca3af;padding:28px">No students detected</td>`;
+        table.appendChild(row);
+      }
+
+      updateLiveStudentCards(status);
+      updateSessionReport(data);
+
+      updateChart(Math.max(0, Math.min(100, focus)), distracted, total);
+    } catch (error) {
+      console.log("Dashboard update error:", error);
+    }
+  }
+
+  updateDashboard();
+  restartDashboardTimer();
+
+</script>
+
+</body>
+</html>

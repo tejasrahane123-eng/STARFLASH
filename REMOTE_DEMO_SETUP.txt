@@ -1,0 +1,26 @@
+STUDENT DISTRACTION DETECTOR — REMOTE DEMO MODE
+
+Files included:
+- web_app.py
+- templates/index_chart.html
+- templates/join.html
+
+1) In your project, replace web_app.py with the new web_app.py.
+2) Replace templates/index_chart.html with the new file.
+3) Add templates/join.html.
+4) Keep your existing static/ folder, manifest.json, sw.js, and .venv as they are.
+5) Start the app:
+   .\.venv\Scripts\python.exe web_app.py
+
+Local dashboard:
+   http://127.0.0.1:5000/
+
+Remote participant page:
+   http://127.0.0.1:5000/join
+
+For a participant on another computer, use an HTTPS public URL/tunnel and share:
+   https://YOUR-PUBLIC-URL/join
+
+The participant must click “Allow Camera”. No camera is accessed without browser permission.
+
+On the presenter dashboard, the /video_feed automatically switches to the remote browser camera while the remote participant is connected. When the remote participant leaves or stops sending frames, the app falls back to the local camera.
